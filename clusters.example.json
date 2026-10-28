@@ -1,0 +1,14 @@
+[
+  {
+    "id": "homelab-k3s",
+    "name": "Proxmox HA K3s Cluster (6-Node)",
+    "mode": "ssh_jump",
+    "jump_host": "192.168.0.30",
+    "jump_port": 22,
+    "jump_user": "root",
+    "jump_pass": "YOUR_SSH_PASSWORD",
+    "k3s_master": "192.168.0.81",
+    "k3s_user": "root",
+    "kubeconfig_path": ""
+  }
+]

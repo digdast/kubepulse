@@ -1,37 +1,95 @@
-# KubePulse — Cross-Platform Remote K3s & Kubernetes Monitor
+<div align="center">
 
-**KubePulse** is a modern, lightweight, cross-platform (**Windows, Linux, macOS, and Docker**) graphical telemetry and management suite for remote **K3s** and **Kubernetes** clusters.
+# ☸️ KubePulse
 
-It connects remotely via **SSH Jump-Host (Proxmox -> K3s)**, **Direct SSH**, or **Local Kubeconfig (`kubectl`)** and streams real-time **CPU, Memory, and Storage** metrics for every node and service in a dark glassmorphic graphical interface.
+### Cross-Platform Remote K3s & Kubernetes Real-Time Telemetry & Command Center
+**Monitor, visualize, and operate remote Kubernetes clusters without installing local tools or opening external ingress.**
+
+<p align="center">
+  <img src="https://img.shields.io/badge/Python-3.10+-3776AB?style=for-the-badge&logo=python&logoColor=white" />
+  <img src="https://img.shields.io/badge/FastAPI-Framework-009688?style=for-the-badge&logo=fastapi&logoColor=white" />
+  <img src="https://img.shields.io/badge/WebSockets-Real--Time-010101?style=for-the-badge&logo=socketdotio&logoColor=white" />
+  <img src="https://img.shields.io/badge/K3s-Kubernetes%20Cluster-326CE5?style=for-the-badge&logo=kubernetes&logoColor=white" />
+  <img src="https://img.shields.io/badge/Docker-Ready-2496ED?style=for-the-badge&logo=docker&logoColor=white" />
+  <img src="https://img.shields.io/badge/License-MIT-blue?style=for-the-badge" />
+</p>
+
+</div>
 
 ---
 
-## Key Features
+## 📸 Production Screenshots
 
-- **Cross-Platform Native Execution**: Runs identically on **Windows**, **Linux**, **macOS**, and **Docker** (`Python 3.10+` + `FastAPI` + `Paramiko` + `WebSockets`).
+### 1. Main Command Center & Services Telemetry (`http://192.168.0.81:30789/`)
+*Live CPU millicores (`mCores`), Memory MiB/GiB usage vs limits, and persistent `/data` NFS storage volume breakdown.*
+
+![KubePulse Command Center](docs/screenshots/kubesonarr-telemetry.png)
+
+### 2. Live Pod Logs Streaming & Rolling Restarts
+*Instant tailing of multi-pod logs across all namespaces with auto-scroll and 1-click rolling rollout triggers.*
+
+![KubePulse Live Logs](docs/screenshots/kubepulse-live-logs.png)
+
+### 3. Cluster Nodes Topology & Resource Allocation
+*Per-node hypervisor stats, control plane health, and embedded etcd quorum monitoring.*
+
+![KubePulse Nodes Topology](docs/screenshots/kubepulse-nodes-topology.png)
+
+---
+
+## 🌟 Overview
+
+**KubePulse** is an ultra-lightweight, cross-platform graphical telemetry suite built in async Python (`FastAPI`, `WebSockets`, `Paramiko`). It connects remotely to any Kubernetes or K3s cluster—either through a **Proxmox SSH Jump Host (`192.168.0.30`)**, **Direct SSH**, or **Local Kubeconfig (`kubectl`)**—and streams real-time CPU, RAM, and storage utilization.
+
+### Architecture Overview
+
+```mermaid
+flowchart LR
+    subgraph Client ["💻 Operator Machine"]
+        Browser["Web Browser\nhttp://localhost:7890"]
+        KubePulse["KubePulse Server\n(FastAPI + WebSockets)"]
+    end
+
+    subgraph Bastion ["🛡️ SSH Jump Host / Proxmox"]
+        PVE["Proxmox VE (192.168.0.30)\nSSH Gateway"]
+    end
+
+    subgraph Cluster ["☸️ 7-Node K3s Cluster (192.168.0.81 - 87)"]
+        K3sMaster["K3s Control Plane\n(192.168.0.81)"]
+        K8sAPI["Kubernetes API\n(/apis/metrics.k8s.io)"]
+        NFS["Shared NFS Volume\n/data (192.168.0.3)"]
+    end
+
+    Browser <-->|WebSocket Stream| KubePulse
+    KubePulse -->|SSH Tunnel Jump| PVE
+    PVE -->|Paramiko SSH Exec| K3sMaster
+    K3sMaster --> K8sAPI
+    K3sMaster -->|du -sb / df -h| NFS
+```
+
+---
+
+## ⚡ Core Capabilities
+
 - **3 Remote Connection Modes**:
-  1. **SSH Jump Host (`ssh_jump`)**: Connects through a Proxmox / Bastion SSH host (`192.168.0.30`) directly into a K3s control-plane node (`192.168.0.81`) — zero local `kubectl` installation or port forwarding required.
-  2. **Direct SSH (`ssh_direct`)**: SSH straight into any K3s/Kubernetes master node.
-  3. **Local Kubeconfig (`kubeconfig`)**: Uses local `kubectl` on Windows, Linux, or macOS.
-- **Full Service & Node Telemetry**:
-  - **CPU Usage**: Live millicores (`mCores`) & `% of vCPU` per node and per service, compared against Kubernetes CPU requests and limits.
-  - **Memory Usage**: Live `MiB` / `GiB` consumption per node and per service, with visual progress bars against pod memory limits.
-  - **Storage Usage**:
-    - Per-node root disk capacity & usage (`/`).
-    - Shared cluster NFS storage capacity & usage (`/data`).
-    - Per-service mounted volume map (`HostPath`, `PVC`, `EmptyDir/tmpfs`) with live directory byte sizes (`du -sb`) for `/data/*` volumes.
-- **Interactive Graphical Operations**:
-  - Live **Top 8 Services by Memory** and **Top 8 Services by CPU** bar charts.
-  - Instant search, namespace filter pills (`media`, `default`, `kube-system`, `monitoring`, `metallb-system`, `kubernetes-dashboard`), and multi-column sorting (`Memory`, `CPU`, `Storage`, `Name`).
-  - **1-Click Live Pod Logs Modal** and **1-Click Rolling Restart** for any Deployment, DaemonSet, or StatefulSet.
-  - **Multi-Cluster Switcher Modal**: Add and switch between multiple K3s or Kubernetes clusters on the fly.
+  1. **SSH Jump Host (`ssh_jump`)**: Tunnels through a Proxmox / Bastion SSH gateway (`192.168.0.30`) directly to K3s master nodes (`192.168.0.81`)—zero local `kubectl` installation required.
+  2. **Direct SSH (`ssh_direct`)**: SSH straight into any control plane or worker node.
+  3. **Local Kubeconfig (`kubeconfig`)**: Uses your local `~/.kube/config`.
+- **Accurate Resource Telemetry**:
+  - **CPU Millicores (`mCores`)**: Compares active utilization against Kubernetes CPU requests and limits.
+  - **Memory Footprint**: Live memory usage in MiB/GiB with visual saturation progress bars.
+  - **Shared Storage Analytics**: Detailed directory size maps (`du -sb`) for shared NFS volumes (`/data/appdata/*`).
+- **Interactive Operations**:
+  - **Namespace Filtering**: Instant filtering across `ai`, `media`, `monitoring`, `dns`, `authentik`, and `default`.
+  - **1-Click Live Log Streaming**: Inspect pod logs without context switching or launching terminal shells.
+  - **1-Click Rolling Restarts**: Trigger immediate rolling deployments for quick config reloads.
+  - **Multi-Cluster Switcher**: Hot-swap between multiple home lab or cloud clusters.
 
 ---
 
-## Quick Start
+## 🚀 Quick Start Guide
 
-### Windows
-Double-click `run.bat` or run from PowerShell / Command Prompt:
+### Windows (1-Click Batch)
 ```powershell
 cd C:\scripts\kubepulse
 .\run.bat
@@ -44,14 +102,19 @@ chmod +x run.sh
 ./run.sh
 ```
 
-### Cross-Platform Python CLI
+### Python CLI
 ```bash
+pip install -r requirements.txt
 python run.py --host 0.0.0.0 --port 7890
 ```
-Then open **http://localhost:7890** in your browser.
+Open **http://localhost:7890** (or NodePort **http://192.168.0.81:30789**).
 
-### Docker / Docker Compose
+### Docker Compose
 ```bash
 docker compose up -d --build
 ```
-Then open **http://localhost:7890**.
+
+---
+
+## 📄 License
+MIT License. Created by ERTech Lab.

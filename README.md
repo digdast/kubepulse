@@ -20,14 +20,14 @@
 
 ## ⚡ Overview
 
-**KubePulse** is a high-performance, dark-glassmorphic graphical observability and operations suite engineered for **K3s** and **Kubernetes** clusters. Designed to run natively on **Windows**, **Linux**, **macOS**, **Docker**, or directly inside **Kubernetes (`monitoring/kubesonarr`)**, it eliminates the need for heavyweight Prometheus/Grafana stacks when you want instant, sub-100ms visibility into every node, pod, service, and storage mount.
+**KubePulse** is a high-performance, dark-glassmorphic graphical observability and operations suite engineered for **K3s** and **Kubernetes** clusters. Designed to run natively on **Windows**, **Linux**, **macOS**, **Docker**, or directly inside **Kubernetes**, it eliminates the need for heavyweight Prometheus/Grafana stacks when you want instant, sub-100ms visibility into every node, pod, service, and storage mount.
 
 ---
 
 ## 🖼️ High-Resolution Interface Gallery
 
 ### 1. Full Telemetry Command Center (`7-Node HA K3s Cluster`)
-Real-time executive KPI gauges across **52 vCPUs**, **88 GiB RAM**, **Node Root Storage**, and **1.5 TB Shared NFS (`/data`)**, paired with live Top Memory & Top CPU service bar charts:
+Real-time executive KPI gauges across **54 vCPUs**, **81.8 GiB RAM**, **Node Root Storage**, and **1.5 TB Shared NFS (`/data`)**, paired with live Top Memory & Top CPU service bar charts:
 
 ![KubePulse Command Center](docs/screenshots/kubepulse-command-center.png)
 
@@ -41,7 +41,7 @@ Interactive workload matrix with instant namespace filtering (`ALL`, `authentik`
 ---
 
 ### 3. Multi-Node Hardware & Storage Topology (`3 Control-Plane/etcd + 4 Workers`)
-Live hardware telemetry cards for every control-plane and worker node showing IP addresses, roles (`control-plane, etcd` / `worker`), vCPU millicore load, RAM utilization, and root disk usage:
+Live hardware telemetry cards for every control-plane and worker node showing roles (`control-plane, etcd` / `worker`), vCPU millicore load, RAM utilization, and root disk usage:
 
 ![KubePulse 7-Node Topology](docs/screenshots/kubepulse-nodes-topology.png)
 
@@ -77,8 +77,8 @@ flowchart LR
     end
 
     subgraph Cluster["☸️ 7-Node HA K3s Cluster"]
-        CP["3x Control-Plane / etcd\nk8s-cp-01 (.81) • cp-02 (.82) • cp-03 (.87)"]
-        WK["4x Worker Nodes (AVX2)\nk8s-worker-01..04 (.83 - .86)"]
+        CP["3x Control-Plane / etcd\nk8s-cp-01 • k8s-cp-02 • k8s-cp-03"]
+        WK["4x Worker Nodes (AVX2)\nk8s-worker-01 .. k8s-worker-04"]
         ST["Shared NFS /data + HostPath + tmpfs"]
         M1 & M2 & M3 --> CP
         CP --- WK
@@ -118,12 +118,10 @@ chmod +x run.sh
 ./run.sh
 ```
 
-### 3. Deploy Natively Inside K3s / Kubernetes (`monitoring/kubesonarr`)
+### 3. Deploy Natively Inside K3s / Kubernetes
 ```bash
 kubectl apply -f k8s-kubesonarr.yaml
 ```
-- **NodePort Access**: `http://<any-k3s-node-ip>:30789`
-- **Ingress Hostnames**: `http://kubesonarr.local` / `http://kubesonarr.ertechlab.com`
 
 ### 4. Docker Compose
 ```bash

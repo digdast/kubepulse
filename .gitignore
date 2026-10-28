@@ -7,4 +7,5 @@ venv/
 
 # Local cluster connection credentials
 clusters.json
+data/
 .env

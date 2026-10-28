@@ -1,130 +1,57 @@
-<div align="center">
+# KubePulse — Cross-Platform Remote K3s & Kubernetes Monitor
 
-# ☸️ KubePulse
-### Next-Generation Cross-Platform Remote K3s & Kubernetes Telemetry Command Center
+**KubePulse** is a modern, lightweight, cross-platform (**Windows, Linux, macOS, and Docker**) graphical telemetry and management suite for remote **K3s** and **Kubernetes** clusters.
 
-[![Platform](https://img.shields.io/badge/Platform-Windows%20%7C%20Linux%20%7C%20macOS%20%7C%20Docker%20%7C%20K3s-0ea5e9?style=for-the-badge&logo=kubernetes&logoColor=white)](https://github.com/digdast/kubepulse)
-[![Python](https://img.shields.io/badge/Python-3.10%2B-10b981?style=for-the-badge&logo=python&logoColor=white)](https://www.python.org/)
-[![FastAPI](https://img.shields.io/badge/FastAPI-WebSockets%205s%20Stream-6366f1?style=for-the-badge&logo=fastapi&logoColor=white)](https://fastapi.tiangolo.com/)
-[![Architecture](https://img.shields.io/badge/Multi--Cluster-SSH%20Jump%20%7C%20Direct%20SSH%20%7C%20Kubeconfig-a855f7?style=for-the-badge)](https://github.com/digdast/kubepulse)
-
-**Real-Time CPU (`mCores`), Memory (`MiB/GiB`), and Storage (`Root Disk / NFS / HostPath / PVC / tmpfs`) Telemetry with 1-Click Container Logs & Zero-Downtime Rolling Restarts.**
+It connects remotely via **SSH Jump-Host (Proxmox -> K3s)**, **Direct SSH**, or **Local Kubeconfig (`kubectl`)** and streams real-time **CPU, Memory, and Storage** metrics for every node and service in a dark glassmorphic graphical interface.
 
 ---
 
-![KubePulse Command Center Overview](docs/screenshots/kubepulse-command-center.png)
+## Key Features
 
-</div>
-
----
-
-## ⚡ Overview
-
-**KubePulse** is a high-performance, dark-glassmorphic graphical observability and operations suite engineered for **K3s** and **Kubernetes** clusters. Designed to run natively on **Windows**, **Linux**, **macOS**, **Docker**, or directly inside **Kubernetes**, it eliminates the need for heavyweight Prometheus/Grafana stacks when you want instant, sub-100ms visibility into every node, pod, service, and storage mount.
-
----
-
-## 🖼️ High-Resolution Interface Gallery
-
-### 1. Full Telemetry Command Center (`7-Node HA K3s Cluster`)
-Real-time executive KPI gauges across **54 vCPUs**, **81.8 GiB RAM**, **Node Root Storage**, and **1.5 TB Shared NFS (`/data`)**, paired with live Top Memory & Top CPU service bar charts:
-
-![KubePulse Command Center](docs/screenshots/kubepulse-command-center.png)
-
----
-
-### 2. Per-Service CPU, Memory & Storage Telemetry Matrix
-Interactive workload matrix with instant namespace filtering (`ALL`, `authentik`, `dns`, `kube-system`, `media`, `monitoring`, `npm`, `portainer`, `tomcat`, `web`), multi-column sorting (`Memory`, `CPU`, `Storage`, `Name`), real-time utilization bars against Kubernetes limits, HostPath/NFS directory byte sizing (`du -sb`), and clickable Ingress routes:
-
-![KubePulse Services Telemetry Matrix](docs/screenshots/kubepulse-services-telemetry.png)
+- **Cross-Platform Native Execution**: Runs identically on **Windows**, **Linux**, **macOS**, and **Docker** (`Python 3.10+` + `FastAPI` + `Paramiko` + `WebSockets`).
+- **3 Remote Connection Modes**:
+  1. **SSH Jump Host (`ssh_jump`)**: Connects through a Proxmox / Bastion SSH host (`192.168.0.30`) directly into a K3s control-plane node (`192.168.0.81`) — zero local `kubectl` installation or port forwarding required.
+  2. **Direct SSH (`ssh_direct`)**: SSH straight into any K3s/Kubernetes master node.
+  3. **Local Kubeconfig (`kubeconfig`)**: Uses local `kubectl` on Windows, Linux, or macOS.
+- **Full Service & Node Telemetry**:
+  - **CPU Usage**: Live millicores (`mCores`) & `% of vCPU` per node and per service, compared against Kubernetes CPU requests and limits.
+  - **Memory Usage**: Live `MiB` / `GiB` consumption per node and per service, with visual progress bars against pod memory limits.
+  - **Storage Usage**:
+    - Per-node root disk capacity & usage (`/`).
+    - Shared cluster NFS storage capacity & usage (`/data`).
+    - Per-service mounted volume map (`HostPath`, `PVC`, `EmptyDir/tmpfs`) with live directory byte sizes (`du -sb`) for `/data/*` volumes.
+- **Interactive Graphical Operations**:
+  - Live **Top 8 Services by Memory** and **Top 8 Services by CPU** bar charts.
+  - Instant search, namespace filter pills (`media`, `default`, `kube-system`, `monitoring`, `metallb-system`, `kubernetes-dashboard`), and multi-column sorting (`Memory`, `CPU`, `Storage`, `Name`).
+  - **1-Click Live Pod Logs Modal** and **1-Click Rolling Restart** for any Deployment, DaemonSet, or StatefulSet.
+  - **Multi-Cluster Switcher Modal**: Add and switch between multiple K3s or Kubernetes clusters on the fly.
 
 ---
 
-### 3. Multi-Node Hardware & Storage Topology (`3 Control-Plane/etcd + 4 Workers`)
-Live hardware telemetry cards for every control-plane and worker node showing roles (`control-plane, etcd` / `worker`), vCPU millicore load, RAM utilization, and root disk usage:
+## Quick Start
 
-![KubePulse 7-Node Topology](docs/screenshots/kubepulse-nodes-topology.png)
-
----
-
-### 4. Live Container Log Streamer & Rolling Restart Controls
-1-click live container stdout/stderr log inspection and zero-downtime `kubectl rollout restart` execution directly from the graphical dashboard:
-
-![KubePulse Live Container Logs](docs/screenshots/kubepulse-live-logs.png)
-
----
-
-## 🏗️ System Architecture
-
-```mermaid
-flowchart LR
-    subgraph Client["🖥️ Operator Workstation / Browser"]
-        UI["Glassmorphic Web UI\n(HTML5 / CSS3 / WebSockets)"]
-    end
-
-    subgraph Engine["⚡ KubePulse Core (Windows / Linux / macOS / K3s Pod)"]
-        API["FastAPI + Uvicorn\n(/ws/telemetry • /api/*)"]
-        COL["KubePulseCollector\n(Concurrent ThreadPool Engine)"]
-        UI <-->|"5s Live JSON Stream"| API
-        API <--> COL
-    end
-
-    subgraph Modes["🔌 3 Connection Transports"]
-        M1["SSH Jump-Host\n(Proxmox Bastion -> K3s Master)"]
-        M2["Direct SSH\n(K3s Control Plane)"]
-        M3["Local Kubeconfig\n(Native kubectl)"]
-        COL --> M1 & M2 & M3
-    end
-
-    subgraph Cluster["☸️ 7-Node HA K3s Cluster"]
-        CP["3x Control-Plane / etcd\nk8s-cp-01 • k8s-cp-02 • k8s-cp-03"]
-        WK["4x Worker Nodes (AVX2)\nk8s-worker-01 .. k8s-worker-04"]
-        ST["Shared NFS /data + HostPath + tmpfs"]
-        M1 & M2 & M3 --> CP
-        CP --- WK
-        CP & WK --- ST
-    end
-```
-
----
-
-## 🚀 Key Capabilities
-
-| Capability | Technical Implementation |
-| :--- | :--- |
-| **Cross-Platform Execution** | Runs identically on **Windows 10/11**, **Linux**, **macOS**, **Docker**, and inside **K3s** (`NodePort 30789`). |
-| **Agentless Remote SSH Jump-Host** | Connects through a Proxmox VE or Bastion host directly into a K3s control plane—zero local `kubectl` installation or kubeconfig certificate copying required. |
-| **Parallel Telemetry Pipeline** | Executes `kubectl get`, `kubectl top nodes/pods`, `/readyz` latency probes, `df -B1`, and parallel `du -sb` volume inspections concurrently in `< 100ms` API latency. |
-| **Deep Storage Observability** | Tracks per-node root disk capacity, shared NFS `/data` pool usage, `PersistentVolumeClaims`, `RAM-tmpfs` mounts, and per-service directory consumption. |
-| **Active Day-2 Operations** | Includes 1-click **Live Container Logs** (`--all-containers=true`) and 1-click **Zero-Downtime Rolling Restarts** (`kubectl rollout restart`). |
-
----
-
-## 🛠️ Quick Start
-
-### 1. Windows (1-Click Launcher)
-Double-click `run.bat` or run from PowerShell:
+### Windows
+Double-click `run.bat` or run from PowerShell / Command Prompt:
 ```powershell
-git clone https://github.com/digdast/kubepulse.git
-cd kubepulse
+cd C:\scripts\kubepulse
 .\run.bat
 ```
 
-### 2. Linux & macOS
+### Linux & macOS
 ```bash
-git clone https://github.com/digdast/kubepulse.git
 cd kubepulse
 chmod +x run.sh
 ./run.sh
 ```
 
-### 3. Deploy Natively Inside K3s / Kubernetes
+### Cross-Platform Python CLI
 ```bash
-kubectl apply -f k8s-kubesonarr.yaml
+python run.py --host 0.0.0.0 --port 7890
 ```
+Then open **http://localhost:7890** in your browser.
 
-### 4. Docker Compose
+### Docker / Docker Compose
 ```bash
 docker compose up -d --build
 ```
-Open **http://localhost:7890** in your browser.
+Then open **http://localhost:7890**.

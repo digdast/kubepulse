@@ -212,7 +212,7 @@ with ThreadPoolExecutor(max_workers=8) as ex:
     f_top_pods = ex.submit(run, "kubectl top pods -A --no-headers")
     f_readyz = ex.submit(measure_readyz)
     f_df = ex.submit(run, "df -B1 / /data 2>/dev/null | tail -n +2")
-    f_du = ex.submit(run, "for d in /var/lib/authentik /var/lib/pihole-cluster /var/lib/plex /var/lib/checkmk /var/lib/npm /data/appdata/* /data/config/* /data/resume; do [ -e \"$d\" ] && timeout 2 du -sb \"$d\" 2>/dev/null & done; wait", 4)
+    f_du = ex.submit(run, "for d in /var/lib/authentik /var/lib/pihole-cluster /var/lib/checkmk /var/lib/npm /data/appdata/* /data/config/* /data/resume; do [ -e \"$d\" ] && timeout 2 du -sb \"$d\" 2>/dev/null & done; wait", 4)
 
 nodes = json.loads(f_nodes.result() or '{"items":[]}')
 pods = json.loads(f_pods.result() or '{"items":[]}')
